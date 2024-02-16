@@ -27,7 +27,15 @@ public struct PlaneC
     }
     public PlaneC(float a, float b, float c, float d)
     {
-        this.position = Vector3C.zero; // modificar
+        if(a != 0)
+            this.position = new Vector3C(d / a, 0, 0); 
+        else if(b != 0)
+            this.position = new Vector3C(0, d / b, 0);
+        else if (c != 0)
+            this.position = new Vector3C(0, 0, d / c);
+        else 
+            this.position = Vector3C.zero;
+
         this.normal = new Vector3C(a, b, c);
     }
     #endregion
@@ -37,9 +45,14 @@ public struct PlaneC
     #endregion
 
     #region METHODS
+    
     #endregion
 
     #region FUNCTIONS
+    //ToEquation(Ax + By + Cz + D = 0)
+    //NearestPoint
+    //Intersection
+    //Equals
     #endregion
 
 }
