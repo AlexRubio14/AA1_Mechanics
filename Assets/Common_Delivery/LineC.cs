@@ -41,14 +41,6 @@ public struct LineC
 
         return nearestPoint;
     }
-    public Vector3C NearestPoint(LineC line)
-    {
-        Vector3C cross = Vector3C.Cross(this.direction, line.direction);
-
-        // Not finished 
-
-        return new Vector3C();
-    }
     #endregion
 
     #region FUNCTIONS
