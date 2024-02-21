@@ -50,6 +50,10 @@ public struct PlaneC
 
     #region FUNCTIONS
     //ToEquation(Ax + By + Cz + D = 0)
+    public  (float A, float B, float C, float D) ToEquation()
+    {
+        return (0, 0, 0, 0);
+    }
     //NearestPoint
     //Intersection
     //Equals
