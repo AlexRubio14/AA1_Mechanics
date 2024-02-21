@@ -1,4 +1,5 @@
 using System;
+using System.Net.NetworkInformation;
 
 [System.Serializable]
 public struct LineC
@@ -20,12 +21,45 @@ public struct LineC
     #endregion
 
     #region OPERATORS
+    public static bool operator ==(LineC a, LineC b) //COMPARATOR 1
+    {
+        return (a.origin == b.origin) && (a.direction == b.direction);
+    }
+
+    public static bool operator !=(LineC a, LineC b) //COMPARATOR 2
+    {
+        return (a.origin != b.origin) || (a.direction != b.direction);
+    }
     #endregion
 
     #region METHODS
+    public Vector3C NearestPoint(Vector3C point)
+    {
+        Vector3C vector = point - origin;
+        float dot = Vector3C.Dot(vector, direction);
+        Vector3C nearestPoint = origin - direction * dot;
+
+        return nearestPoint;
+    }
+    public Vector3C NearestPoint(LineC line)
+    {
+        Vector3C cross = Vector3C.Cross(this.direction, line.direction);
+
+        // Not finished 
+
+        return new Vector3C();
+    }
     #endregion
 
     #region FUNCTIONS
+    public static LineC CreateLineFromTwoPoints(Vector3C pointA, Vector3C pointB)
+    {
+        LineC lineTemp;
+        lineTemp.origin = pointA;
+        lineTemp.direction = pointB - pointA;
+
+        return lineTemp;
+    }
     #endregion
 
 }
