@@ -25,18 +25,16 @@ public struct PlaneC
         position = pointA;
         normal = Vector3C.Cross(pointB - pointA, pointC - pointA);
     }
-    public PlaneC(float a, float b, float c, float d)
+    
+    public PlaneC(Vector3C n, float D)
     {
-        if(a != 0)
-            position = new Vector3C(d / a, 0, 0); 
-        else if(b != 0)
-            position = new Vector3C(0, d / b, 0);
-        else if (c != 0)
-            position = new Vector3C(0, 0, d / c);
-        else 
-            position = Vector3C.zero;
+        float x, y, z;
+        x = -D / -n.x;
+        y = -D / -n.y;
+        z = -D / -n.z;
 
-        normal = new Vector3C(a, b, c);
+        this.position = new Vector3C(x, y, z);
+        this.normal = n;
     }
     #endregion
 
