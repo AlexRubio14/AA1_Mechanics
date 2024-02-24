@@ -1,11 +1,11 @@
 using System;
 using System.Drawing;
+using System.Linq;
+using System.Runtime.CompilerServices;
 
 [System.Serializable]
 public class AA1_ParticleSystem
 {
-   
-
     [System.Serializable]
     public struct Settings
     {
@@ -42,6 +42,15 @@ public class AA1_ParticleSystem
     }
     public SettingsCollision settingsCollision;
 
+    [System.Serializable]
+    public struct SettingsParticle
+    {
+        public float size;
+        public float mass;
+        public int maxNumParticles;
+    }
+    public SettingsParticle settingsParticle;
+
     public struct Particle
     {
         public float mass;
@@ -53,46 +62,65 @@ public class AA1_ParticleSystem
         public Vector3C velocity;
         public Vector3C aceleration;
 
-        public Particle(float _size, float _mass)
+        public Particle(SettingsParticle settingsParticle, SettingsCascade settingsCascade)
         {
-            Random rnd = new Random();
 
-            position = new Vector3C((float)rnd.NextDouble() - 0.5f, (float)rnd.NextDouble() - 0.5f, (float)rnd.NextDouble() - 0.5f);
-            size = _size;
+            size = settingsParticle.size;   
 
-            force = Vector3C.zero;  
-            mass = _mass;    
+            force = InitForce();  
+            mass = settingsParticle.mass;   
             velocity = Vector3C.zero;   
             aceleration = Vector3C.zero;    
+
+            position = RandomPosCascade(settingsCascade.PointA, settingsCascade.PointB);
+        }
+
+        private static Vector3C RandomPosCascade(Vector3C pointA, Vector3C pointB)
+        {
+            Random rnd = new Random();
+            
+            LineC lineBetweenCascades = LineC.CreateLineFromTwoPoints(pointA, pointB);
+
+            // EQ. PARAMETRICA: r(x) = B + x * direction x = 0..1
+            return lineBetweenCascades.origin + (lineBetweenCascades.direction * (float)rnd.NextDouble());
+        }
+        private static Vector3C InitForce()
+        {
+            Random rnd = new Random();
+            return new Vector3C (rnd.Next(10,20), rnd.Next(5,20), rnd.Next(10, 20));    
         }
 
     }
-    [System.Serializable]
-    public struct SettingsParticle
+
+    bool created = false;   
+    Particle[] particles = new Particle[100]; 
+    public Particle[] Update(float dt)  
     {
-        public float size;
-        public float mass;
-    }
-    public SettingsParticle settingsParticle;
+        if(!created)
+        {
+            CreateParticles(particles);
+            created = true; 
+        }
 
-
-    Particle[] particles = new Particle[100];
-
-    
-    public Particle[] Update(float dt)
-    {
         for (int i = 0; i < particles.Length; ++i)
         {
-            particles[i].size = 0.1f;
-            particles[i].force = new Vector3C(0, -9.8f, 0);
-            particles[i].mass = 1.0f;
+            // Apply forces
+            particles[i].force += settings.gravity;
+
+            // Calculate acceleration, velocity and position
             particles[i].aceleration = particles[i].force / particles[i].mass;
             particles[i].velocity = particles[i].velocity + particles[i].aceleration * dt;
             particles[i].position = particles[i].position + particles[i].velocity * dt;
-
-            //particles[i].position = ;
         }
         return particles;
+    }
+
+    public void CreateParticles(Particle[] particles)
+    {
+        for(int i = 0; i < particles.Length; ++i)
+        {
+            particles[i] = new Particle(settingsParticle, settingsCascade);
+        }
     }
 
     public void Debug()
@@ -110,4 +138,6 @@ public class AA1_ParticleSystem
             item.Print(Vector3C.blue);
         }
     }
+
+    
 }
