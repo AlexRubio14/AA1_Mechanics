@@ -9,6 +9,7 @@ public class AA1_ParticleSystem
     [System.Serializable]
     public struct Settings
     {
+        public uint objectPoolingParticles; 
         public Vector3C gravity;
         public float bounce;
     }
@@ -19,7 +20,17 @@ public class AA1_ParticleSystem
     {
         public Vector3C PointA;
         public Vector3C PointB;
-        public float particlesPerSecond;
+        public Vector3C Direction;
+        public bool randomDirection;
+
+        public float minImpulse;
+        public float maxImpulse;
+
+        public float minParticlesPerSecond;
+        public float maxParticlesPerSecond;
+
+        public float minParticlesLifeTime;
+        public float maxParticlesLifeTime;
     }
     public SettingsCascade settingsCascade;
 
@@ -28,8 +39,16 @@ public class AA1_ParticleSystem
     {
         public Vector3C Start;
         public Vector3C Direction;
-        public float angle;
-        public float particlesPerSecond;
+        public float openingAngle;
+
+        public float minImpulse;
+        public float maxImpulse;
+
+        public float minParticlesPerSecond;
+        public float maxParticlesPerSecond;
+
+        public float minParticlesLifeTime;
+        public float maxParticlesLifeTime;
     }
     public SettingsCannon settingsCannon;
 
@@ -47,7 +66,6 @@ public class AA1_ParticleSystem
     {
         public float size;
         public float mass;
-        public int maxNumParticles;
     }
     public SettingsParticle settingsParticle;
 
@@ -65,9 +83,10 @@ public class AA1_ParticleSystem
         public Particle(SettingsParticle settingsParticle, SettingsCascade settingsCascade)
         {
 
-            size = settingsParticle.size;   
+            size = settingsParticle.size;
 
-            force = InitForce();  
+            force = Vector3C.zero; 
+            //force = InitForce(settings);  
             mass = settingsParticle.mass;   
             velocity = Vector3C.zero;   
             aceleration = Vector3C.zero;    
@@ -84,22 +103,36 @@ public class AA1_ParticleSystem
             // EQ. PARAMETRICA: r(x) = B + x * direction x = 0..1
             return lineBetweenCascades.origin + (lineBetweenCascades.direction * (float)rnd.NextDouble());
         }
-        private static Vector3C InitForce()
+        private static Vector3C InitForce(SettingsCascade sCascade)
         {
             Random rnd = new Random();
-            return new Vector3C (rnd.Next(10,20), rnd.Next(5,20), rnd.Next(10, 20));    
+            return new Vector3C 
+                (rnd.Next((int)(sCascade.Direction.x * sCascade.minImpulse), (int)(sCascade.Direction.x * sCascade.maxImpulse)), 
+                rnd.Next(100, 200), 
+                rnd.Next(100, 200));    
         }
 
     }
 
-    bool created = false;   
-    Particle[] particles = new Particle[100]; 
+    bool created = false;
+    float timeTospawn = 5.0f; 
+    Particle[] particles = new Particle [100]; 
+
     public Particle[] Update(float dt)  
     {
         if(!created)
         {
             CreateParticles(particles);
             created = true; 
+        }
+        else
+        {
+            timeTospawn += dt;
+            if(timeTospawn > 1)
+            {
+                timeTospawn = 0; 
+                created = false;
+            }
         }
 
         for (int i = 0; i < particles.Length; ++i)
@@ -117,9 +150,9 @@ public class AA1_ParticleSystem
 
     public void CreateParticles(Particle[] particles)
     {
-        for(int i = 0; i < particles.Length; ++i)
+        for (int i = 0; i < particles.Length; ++i)
         {
-            particles[i] = new Particle(settingsParticle, settingsCascade);
+            particles[i] = new Particle(settingsParticle, settingsCascade, settings);
         }
     }
 

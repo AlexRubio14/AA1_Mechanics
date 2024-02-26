@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.12731704, g: 0.13414727, b: 0.121078536, a: 1}
+  m_IndirectSpecularColor: {r: 0.12731749, g: 0.13414757, b: 0.1210787, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -164,6 +164,14 @@ MonoBehaviour:
         y: -9.81
         z: 0
       bounce: 0
+      minImpulse:
+        x: 40
+        y: 100
+        z: 40
+      maxImpulse:
+        x: 70
+        y: 150
+        z: 70
     settingsCascade:
       PointA:
         x: 0
@@ -220,9 +228,9 @@ MonoBehaviour:
           z: 0.2
         radius: 0.1
     settingsParticle:
-      size: 0.05
-      mass: 1
-      maxNumParticles: 20
+      numParticles: 0
+      size: 0.03
+      mass: 0.5
 --- !u!4 &83351503
 Transform:
   m_ObjectHideFlags: 0
