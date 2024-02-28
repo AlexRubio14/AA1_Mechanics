@@ -179,8 +179,8 @@ MonoBehaviour:
         y: 20
         z: 10
       randomDirection: 0
-      minImpulse: 5
-      maxImpulse: 12
+      minImpulse: 10
+      maxImpulse: 35
       minParticlesPerSecond: 0
       maxParticlesPerSecond: 0
       minParticlesLifeTime: 0
@@ -238,6 +238,8 @@ MonoBehaviour:
     settingsParticle:
       size: 0.03
       mass: 0.5
+    emissionMode:
+      mode: 0
 --- !u!4 &83351503
 Transform:
   m_ObjectHideFlags: 0

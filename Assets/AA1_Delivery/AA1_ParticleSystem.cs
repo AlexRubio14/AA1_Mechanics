@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using System;
 using System.Drawing;
 using System.Linq;
@@ -70,8 +71,18 @@ public class AA1_ParticleSystem
     }
     public SettingsParticle settingsParticle;
 
+    [System.Serializable]
+    public struct EmissionMode
+    {
+        public enum Emission { CASCADE, CANNON };
+        public Emission mode;
+    }
+    public EmissionMode emissionMode;
+
+
     public struct Particle
     {
+
         public float mass;
         public float size;
 
@@ -81,18 +92,26 @@ public class AA1_ParticleSystem
         public Vector3C velocity;
         public Vector3C aceleration;
 
-        public Particle(SettingsParticle settingsParticle, SettingsCascade settingsCascade)
+        public Particle(SettingsParticle settingsParticle, SettingsCascade settingsCascade, SettingsCannon settingsCannon, EmissionMode emissionMode)
         {
-
             size = settingsParticle.size;
 
             force = Vector3C.zero; 
-            force = InitForce(settingsCascade);  
             mass = settingsParticle.mass;   
             velocity = Vector3C.zero;   
             aceleration = Vector3C.zero;    
 
-            position = RandomPosCascade(settingsCascade.PointA, settingsCascade.PointB);
+            if(emissionMode.mode == EmissionMode.Emission.CASCADE)
+            {
+                position = RandomPosCascade(settingsCascade.PointA, settingsCascade.PointB);
+                force = InitForce(settingsCascade, settingsCannon, emissionMode);  
+            }
+            else
+            {
+                position = settingsCannon.Start;
+                force = Vector3C.zero;
+            }
+
         }
 
         private static Vector3C RandomPosCascade(Vector3C pointA, Vector3C pointB)
@@ -104,16 +123,43 @@ public class AA1_ParticleSystem
             // EQ. PARAMETRICA: r(x) = B + x * direction x = 0..1
             return lineBetweenCascades.origin + (lineBetweenCascades.direction * (float)rnd.NextDouble());
         }
-        private static Vector3C InitForce(SettingsCascade sCascade)
+       
+        
+        private static Vector3C InitForce(SettingsCascade sCascade, SettingsCannon sCannon, EmissionMode emissionMode)
         {
             Random rnd = new Random();
 
-            return new Vector3C
-                (rnd.Next((int)(sCascade.Direction.x* sCascade.minImpulse), (int)(sCascade.Direction.x * sCascade.maxImpulse)),
-                rnd.Next((int)(sCascade.Direction.y * sCascade.minImpulse), (int)(sCascade.Direction.y * sCascade.maxImpulse)),
-                rnd.Next((int)(sCascade.Direction.z * sCascade.minImpulse), (int)(sCascade.Direction.z * sCascade.maxImpulse)));
-        }
+            switch (emissionMode.mode)
+            {
+                case EmissionMode.Emission.CASCADE:
+                    return new Vector3C
+                        (rnd.Next((int)(sCascade.Direction.x * sCascade.minImpulse), (int)(sCascade.Direction.x * sCascade.maxImpulse)),
+                        rnd.Next((int)(sCascade.Direction.y * sCascade.minImpulse), (int)(sCascade.Direction.y * sCascade.maxImpulse)),
+                        rnd.Next((int)(sCascade.Direction.z * sCascade.minImpulse), (int)(sCascade.Direction.z * sCascade.maxImpulse)));
 
+                case EmissionMode.Emission.CANNON:
+
+                    Vector3C direction = new Vector3C
+                        (rnd.Next((int)(sCannon.Direction.x * sCannon.minImpulse), (int)(sCannon.Direction.x * sCannon.maxImpulse)),
+                        rnd.Next((int)(sCannon.Direction.y * sCannon.minImpulse), (int)(sCannon.Direction.y * sCannon.maxImpulse)),
+                        rnd.Next((int)(sCannon.Direction.z * sCannon.minImpulse), (int)(sCannon.Direction.z * sCannon.maxImpulse)));
+
+                    float scalar = Vector3C.Dot(direction, sCannon.Direction);
+                    
+                    float currentAngle = (float)Math.Acos(scalar) / (direction.magnitude * sCannon.Direction.magnitude);
+
+                    while (currentAngle >= sCannon.openingAngle)
+                    {
+
+                    }
+
+                    return direction;
+                default:
+                    return Vector3C.zero;
+            }
+
+            
+        }
     }
 
     bool created = false;
@@ -146,6 +192,7 @@ public class AA1_ParticleSystem
             particles[i].aceleration = particles[i].force / particles[i].mass;
             particles[i].velocity = particles[i].velocity + particles[i].aceleration * dt;
             particles[i].position = particles[i].position + particles[i].velocity * dt;
+            particles[i].force = Vector3C.zero;
         }
         return particles;
     }
@@ -154,7 +201,7 @@ public class AA1_ParticleSystem
     {
         for (int i = 0; i < particles.Length; ++i)
         {
-            particles[i] = new Particle(settingsParticle, settingsCascade);
+            particles[i] = new Particle(settingsParticle, settingsCascade, settingsCannon, emissionMode);
         }
     }
 
