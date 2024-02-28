@@ -2,6 +2,7 @@ using System;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using UnityEditor;
 
 [System.Serializable]
 public class AA1_ParticleSystem
@@ -86,7 +87,7 @@ public class AA1_ParticleSystem
             size = settingsParticle.size;
 
             force = Vector3C.zero; 
-            //force = InitForce(settings);  
+            force = InitForce(settingsCascade);  
             mass = settingsParticle.mass;   
             velocity = Vector3C.zero;   
             aceleration = Vector3C.zero;    
@@ -106,10 +107,11 @@ public class AA1_ParticleSystem
         private static Vector3C InitForce(SettingsCascade sCascade)
         {
             Random rnd = new Random();
-            return new Vector3C 
-                (rnd.Next((int)(sCascade.Direction.x * sCascade.minImpulse), (int)(sCascade.Direction.x * sCascade.maxImpulse)), 
-                rnd.Next(100, 200), 
-                rnd.Next(100, 200));    
+
+            return new Vector3C
+                (rnd.Next((int)(sCascade.Direction.x* sCascade.minImpulse), (int)(sCascade.Direction.x * sCascade.maxImpulse)),
+                rnd.Next((int)(sCascade.Direction.y * sCascade.minImpulse), (int)(sCascade.Direction.y * sCascade.maxImpulse)),
+                rnd.Next((int)(sCascade.Direction.z * sCascade.minImpulse), (int)(sCascade.Direction.z * sCascade.maxImpulse)));
         }
 
     }
@@ -152,12 +154,14 @@ public class AA1_ParticleSystem
     {
         for (int i = 0; i < particles.Length; ++i)
         {
-            particles[i] = new Particle(settingsParticle, settingsCascade, settings);
+            particles[i] = new Particle(settingsParticle, settingsCascade);
         }
     }
 
     public void Debug()
     {
+        
+
         foreach (var item in settingsCollision.planes)
         {
             item.Print(Vector3C.red);

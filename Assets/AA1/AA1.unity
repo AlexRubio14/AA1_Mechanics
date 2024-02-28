@@ -159,19 +159,12 @@ MonoBehaviour:
   cascadeB: {fileID: 2040244667}
   system:
     settings:
+      objectPoolingParticles: 0
       gravity:
         x: 0
         y: -9.81
         z: 0
       bounce: 0
-      minImpulse:
-        x: 40
-        y: 100
-        z: 40
-      maxImpulse:
-        x: 70
-        y: 150
-        z: 70
     settingsCascade:
       PointA:
         x: 0
@@ -181,7 +174,17 @@ MonoBehaviour:
         x: 0
         y: 0
         z: 0
-      particlesPerSecond: 100
+      Direction:
+        x: 10
+        y: 20
+        z: 10
+      randomDirection: 0
+      minImpulse: 5
+      maxImpulse: 12
+      minParticlesPerSecond: 0
+      maxParticlesPerSecond: 0
+      minParticlesLifeTime: 0
+      maxParticlesLifeTime: 0
     settingsCannon:
       Start:
         x: 0
@@ -191,8 +194,13 @@ MonoBehaviour:
         x: 0
         y: 0
         z: 0
-      angle: 0
-      particlesPerSecond: 0
+      openingAngle: 0
+      minImpulse: 0
+      maxImpulse: 0
+      minParticlesPerSecond: 0
+      maxParticlesPerSecond: 0
+      minParticlesLifeTime: 0
+      maxParticlesLifeTime: 0
     settingsCollision:
       planes:
       - position:
@@ -228,7 +236,6 @@ MonoBehaviour:
           z: 0.2
         radius: 0.1
     settingsParticle:
-      numParticles: 0
       size: 0.03
       mass: 0.5
 --- !u!4 &83351503
@@ -275,7 +282,7 @@ Transform:
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.5, y: 0, z: 0.5}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 83351503}
   m_RootOrder: -1
