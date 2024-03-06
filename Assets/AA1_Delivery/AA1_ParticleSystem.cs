@@ -1,9 +1,4 @@
-using JetBrains.Annotations;
 using System;
-using System.Drawing;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using UnityEditor;
 
 [System.Serializable]
 public class AA1_ParticleSystem
@@ -11,7 +6,8 @@ public class AA1_ParticleSystem
     [System.Serializable]
     public struct Settings
     {
-        public uint objectPoolingParticles; 
+        public uint objectPoolingParticles;
+        public uint poolCount;
         public Vector3C gravity;
         public float bounce;
     }
@@ -82,133 +78,136 @@ public class AA1_ParticleSystem
 
     public struct Particle
     {
+        public bool active; 
 
         public float mass;
         public float size;
+        public float lifeTime; 
 
         public Vector3C force;
         
         public Vector3C position;
         public Vector3C velocity;
         public Vector3C aceleration;
-
-        public Particle(SettingsParticle settingsParticle, SettingsCascade settingsCascade, SettingsCannon settingsCannon, EmissionMode emissionMode)
-        {
-            size = settingsParticle.size;
-
-            force = Vector3C.zero; 
-            mass = settingsParticle.mass;   
-            velocity = Vector3C.zero;   
-            aceleration = Vector3C.zero;    
-
-            if(emissionMode.mode == EmissionMode.Emission.CASCADE)
-            {
-                position = RandomPosCascade(settingsCascade.PointA, settingsCascade.PointB);
-                force = InitForce(settingsCascade, settingsCannon, emissionMode);  
-            }
-            else
-            {
-                position = settingsCannon.Start;
-                force = Vector3C.zero;
-            }
-
-        }
-
-        private static Vector3C RandomPosCascade(Vector3C pointA, Vector3C pointB)
-        {
-            Random rnd = new Random();
-            
-            LineC lineBetweenCascades = LineC.CreateLineFromTwoPoints(pointA, pointB);
-
-            // EQ. PARAMETRICA: r(x) = B + x * direction x = 0..1
-            return lineBetweenCascades.origin + (lineBetweenCascades.direction * (float)rnd.NextDouble());
-        }
-       
-        
-        private static Vector3C InitForce(SettingsCascade sCascade, SettingsCannon sCannon, EmissionMode emissionMode)
-        {
-            Random rnd = new Random();
-
-            switch (emissionMode.mode)
-            {
-                case EmissionMode.Emission.CASCADE:
-                    return new Vector3C
-                        (rnd.Next((int)(sCascade.Direction.x * sCascade.minImpulse), (int)(sCascade.Direction.x * sCascade.maxImpulse)),
-                        rnd.Next((int)(sCascade.Direction.y * sCascade.minImpulse), (int)(sCascade.Direction.y * sCascade.maxImpulse)),
-                        rnd.Next((int)(sCascade.Direction.z * sCascade.minImpulse), (int)(sCascade.Direction.z * sCascade.maxImpulse)));
-
-                case EmissionMode.Emission.CANNON:
-
-                    Vector3C direction = new Vector3C
-                        (rnd.Next((int)(sCannon.Direction.x * sCannon.minImpulse), (int)(sCannon.Direction.x * sCannon.maxImpulse)),
-                        rnd.Next((int)(sCannon.Direction.y * sCannon.minImpulse), (int)(sCannon.Direction.y * sCannon.maxImpulse)),
-                        rnd.Next((int)(sCannon.Direction.z * sCannon.minImpulse), (int)(sCannon.Direction.z * sCannon.maxImpulse)));
-
-                    float scalar = Vector3C.Dot(direction, sCannon.Direction);
-                    
-                    float currentAngle = (float)Math.Acos(scalar) / (direction.magnitude * sCannon.Direction.magnitude);
-
-                    while (currentAngle >= sCannon.openingAngle)
-                    {
-
-                    }
-
-                    return direction;
-                default:
-                    return Vector3C.zero;
-            }
-
-            
-        }
     }
+    Random rnd = new Random();
 
-    bool created = false;
-    float timeTospawn = 5.0f; 
-    Particle[] particles = new Particle [100]; 
+    float timer = 0.0f;
+    float spawnTime = 0.0f; 
+    Particle[] particles = null;
 
     public Particle[] Update(float dt)  
     {
-        if(!created)
+
+        if(timer == 0.0f)
         {
-            CreateParticles(particles);
-            created = true; 
+            InitPoolingParticles();
         }
-        else
-        {
-            timeTospawn += dt;
-            if(timeTospawn > 1)
-            {
-                timeTospawn = 0; 
-                created = false;
-            }
-        }
+        timer += dt;
+
+        CreateParticle(dt); 
 
         for (int i = 0; i < particles.Length; ++i)
         {
-            // Apply forces
-            particles[i].force += settings.gravity;
+            if (particles[i].active)
+            {
+                // Apply forces
+                particles[i].force += settings.gravity;
 
-            // Calculate acceleration, velocity and position
-            particles[i].aceleration = particles[i].force / particles[i].mass;
-            particles[i].velocity = particles[i].velocity + particles[i].aceleration * dt;
-            particles[i].position = particles[i].position + particles[i].velocity * dt;
-            particles[i].force = Vector3C.zero;
+                // Calculate acceleration, velocity and position
+                particles[i].aceleration = particles[i].force / particles[i].mass;
+                particles[i].velocity = particles[i].velocity + particles[i].aceleration * dt;
+                particles[i].position = particles[i].position + particles[i].velocity * dt;
+                particles[i].force = Vector3C.zero;
+
+                // Clean forces
+                particles[i].force = Vector3C.zero;
+            }
+            else
+            {
+                // Calculate acceleration, velocity and position
+                particles[i].aceleration = Vector3C.zero;
+                particles[i].velocity = Vector3C.zero;
+                particles[i].position = Vector3C.one * 100;
+                particles[i].force = Vector3C.zero;
+            }
         }
         return particles;
     }
 
-    public void CreateParticles(Particle[] particles)
+    public void InitPoolingParticles()
     {
-        for (int i = 0; i < particles.Length; ++i)
+        settings.poolCount = 0;
+        particles = new Particle[settings.objectPoolingParticles];
+    }
+
+    public int NumParticlesToSpawn()
+    {
+
+        switch (emissionMode.mode)
         {
-            particles[i] = new Particle(settingsParticle, settingsCascade, settingsCannon, emissionMode);
+            case EmissionMode.Emission.CASCADE:
+                return rnd.Next((int)settingsCascade.minParticlesPerSecond, (int)settingsCascade.maxParticlesPerSecond);
+            case EmissionMode.Emission.CANNON:
+                return rnd.Next((int)settingsCannon.minParticlesPerSecond, (int)settingsCannon.maxParticlesPerSecond);
+            default:
+                return 0;
+        }
+    }
+
+    public void CreateParticle(float dt)
+    {
+        spawnTime += NumParticlesToSpawn() * dt;
+        if (spawnTime < 1.0f)
+        {
+            return;
+        }
+        spawnTime -= 1.0f;
+
+        settings.poolCount++;
+        if(settings.poolCount >= settings.objectPoolingParticles) 
+        {
+            settings.poolCount = 0;
+        }
+
+        if (particles[settings.poolCount].active) { return; }
+
+        particles[settings.poolCount].active = true;
+
+        particles[settings.poolCount].size = settingsParticle.size;
+        particles[settings.poolCount].mass = settingsParticle.mass;
+
+        switch (emissionMode.mode)
+        {
+            case EmissionMode.Emission.CASCADE:
+
+                particles[settings.poolCount].lifeTime = rnd.Next((int)settingsCascade.minParticlesLifeTime, (int)settingsCascade.maxParticlesLifeTime);
+
+                LineC lineBetweenCascades = LineC.CreateLineFromTwoPoints(settingsCascade.PointA, settingsCascade.PointB);
+                // EQ. PARAMETRICA: r(x) = B + x * direction x = 0..1
+                particles[settings.poolCount].position = lineBetweenCascades.origin + (lineBetweenCascades.direction * (float)rnd.NextDouble());
+
+                particles[settings.poolCount].force = new Vector3C
+                    (rnd.Next((int)(settingsCascade.Direction.x * settingsCascade.minImpulse), (int)(settingsCascade.Direction.x * settingsCascade.maxImpulse)),
+                    rnd.Next((int)(settingsCascade.Direction.y * settingsCascade.minImpulse), (int)(settingsCascade.Direction.y * settingsCascade.maxImpulse)),
+                    rnd.Next((int)(settingsCascade.Direction.z * settingsCascade.minImpulse), (int)(settingsCascade.Direction.z * settingsCascade.maxImpulse)));
+                break;
+            case EmissionMode.Emission.CANNON:
+
+                particles[settings.poolCount].lifeTime = rnd.Next((int)settingsCannon.minParticlesLifeTime, (int)settingsCannon.maxParticlesLifeTime);
+
+                particles[settings.poolCount].position = settingsCannon.Start;
+
+                particles[settings.poolCount].force = Vector3C.zero;
+
+                break;
+            default:
+                break;
         }
     }
 
     public void Debug()
     {
-        
-
         foreach (var item in settingsCollision.planes)
         {
             item.Print(Vector3C.red);
@@ -222,6 +221,4 @@ public class AA1_ParticleSystem
             item.Print(Vector3C.blue);
         }
     }
-
-    
 }

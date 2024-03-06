@@ -159,7 +159,7 @@ MonoBehaviour:
   cascadeB: {fileID: 2040244667}
   system:
     settings:
-      objectPoolingParticles: 0
+      objectPoolingParticles: 1000
       gravity:
         x: 0
         y: -9.81
