@@ -159,7 +159,8 @@ MonoBehaviour:
   cascadeB: {fileID: 2040244667}
   system:
     settings:
-      objectPoolingParticles: 1000
+      objectPoolingParticles: 200
+      poolCount: 0
       gravity:
         x: 0
         y: -9.81
@@ -176,15 +177,15 @@ MonoBehaviour:
         z: 0
       Direction:
         x: 10
-        y: 20
+        y: 15
         z: 10
       randomDirection: 0
       minImpulse: 10
-      maxImpulse: 35
-      minParticlesPerSecond: 0
-      maxParticlesPerSecond: 0
-      minParticlesLifeTime: 0
-      maxParticlesLifeTime: 0
+      maxImpulse: 10
+      minParticlesPerSecond: 10
+      maxParticlesPerSecond: 100
+      minParticlesLifeTime: 1
+      maxParticlesLifeTime: 1
     settingsCannon:
       Start:
         x: 0
