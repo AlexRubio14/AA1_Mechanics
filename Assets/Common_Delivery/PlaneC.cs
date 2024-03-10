@@ -37,11 +37,6 @@ public struct PlaneC
         this.normal = n;
     }
     #endregion
-
-    #region OPERATORS
-
-    #endregion
-
     #region METHODS
     //ToEquation(Ax + By + Cz + D = 0)
     public (float A, float B, float C, float D) ToEquation()
@@ -69,6 +64,15 @@ public struct PlaneC
             return other.normal == this.normal;
         }
         return false;
+    }
+
+    public float DistanceToPoint()
+    {
+        float distance;
+
+
+
+        return distance;
     }
     #endregion
 

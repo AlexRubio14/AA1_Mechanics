@@ -10,7 +10,7 @@ public class AA1_ParticleSystem
     public struct Settings
     {
         public uint objectPoolingParticles;
-        public uint poolCount;
+        public uint poolIndex;
         public Vector3C gravity;
         public float bounce;
     }
@@ -81,7 +81,8 @@ public class AA1_ParticleSystem
 
     public struct Particle
     {
-        public bool active; 
+        public bool active;
+        public bool hasCollisioned;
 
         public float mass;
         public float size;
@@ -104,9 +105,11 @@ public class AA1_ParticleSystem
             this.velocity = Vector3C.zero;
         }
 
-        public void InitParticleInCascade(SettingsCascade settingsCascade)
+        public void InitParticleInCascade(SettingsCascade settingsCascade, SettingsParticle settingsParticle)
         {
             Random rnd = new Random();
+
+            this.InitParticle(settingsParticle);
 
             this.lifeTime = rnd.Next((int)settingsCascade.minParticlesLifeTime, (int)settingsCascade.maxParticlesLifeTime);
 
@@ -120,9 +123,11 @@ public class AA1_ParticleSystem
                 rnd.Next((int)(settingsCascade.Direction.z * settingsCascade.minImpulse), (int)(settingsCascade.Direction.z * settingsCascade.maxImpulse)));
         }
 
-        public void InitParticleInCannon(SettingsCannon settingsCannon)
+        public void InitParticleInCannon(SettingsCannon settingsCannon, SettingsParticle settingsParticle)
         {
             Random rnd = new Random();
+
+            this.InitParticle(settingsParticle);
 
             this.lifeTime = rnd.Next((int)settingsCannon.minParticlesLifeTime, (int)settingsCannon.maxParticlesLifeTime);
 
@@ -139,7 +144,6 @@ public class AA1_ParticleSystem
                 return true;
             }
             return false;
-
         }
 
         public void Euler(Settings settings, float dt)
@@ -173,27 +177,25 @@ public class AA1_ParticleSystem
         if (lastTimeSpawned > spawnTime)
             SpawnParticle(dt);
 
-
         for (int i = 0; i < particles.Length; ++i)
         {
             if (particles[i].active)
             {
                 // 1. Comprobar el tiempo de vida
-                if (particles[i].CheckLifeTime()) { continue; }
+                if (particles[i].CheckLifeTime()) 
+                {
+                    // Spawnear fuera de la pantalla
+                    particles[i].position = Vector3C.one * 100;
+                    continue;
+                }
                 particles[i].lifeTime -= dt;
 
                 // 2. Calcular euler
                 particles[i].Euler(settings, dt);
-
-            }
-            else
-            {
-                // 1. Spawnear fuera de la pantalla
-                particles[i].position = Vector3C.one * 100;
             }
         }
 
-        // Si ha pasado 1 segundo canvia el numero de particulas a spawner por segundo
+        // Si ha pasado 1 segundo cambia el numero de particulas a spawnear por segundo
         if (timerOneSecond > 1.0f)
         {
             timerOneSecond -= 1.0f;
@@ -211,7 +213,7 @@ public class AA1_ParticleSystem
     {
         start = false;
 
-        settings.poolCount = 0;
+        settings.poolIndex = 0;
         particles = new Particle[settings.objectPoolingParticles];
 
        spawnTime = NewSpawnTime();
@@ -244,27 +246,26 @@ public class AA1_ParticleSystem
     {
         // 1. Tiene que spawner alguna particula
         lastTimeSpawned -= spawnTime;
-        settings.poolCount++;
 
-        // 2. Comprobar que el pool count no sobrepase la array
-        if (settings.poolCount >= settings.objectPoolingParticles) { settings.poolCount = 0; }
+        // 2. Comprobar que no esta activa
+        if (particles[settings.poolIndex].active) { return; }
 
-        // 3. Comprobar que no esta activa
-        if (particles[settings.poolCount].active) { return; }
-
-        // 4. Si no esta activa la seteamos
-        particles[settings.poolCount].InitParticle(settingsParticle); 
+        // 3. Si no esta activa la seteamos
         switch (emissionMode.mode)
         {
             case EmissionMode.Emission.CASCADE:
-                particles[settings.poolCount].InitParticleInCascade(settingsCascade); 
+                particles[settings.poolIndex].InitParticleInCascade(settingsCascade, settingsParticle); 
                 break;
             case EmissionMode.Emission.CANNON:
-                particles[settings.poolCount].InitParticleInCannon(settingsCannon);
+                particles[settings.poolIndex].InitParticleInCannon(settingsCannon, settingsParticle);
                 break;
             default:
                 break;
         }
+        settings.poolIndex++;
+
+        // 4. Comprobar que el pool count no sobrepase la array
+        if (settings.poolIndex >= settings.objectPoolingParticles) { settings.poolIndex = 0; }
     }
 
     public void Debug()
