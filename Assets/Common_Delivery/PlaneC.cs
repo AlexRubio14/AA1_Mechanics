@@ -63,7 +63,7 @@ public struct PlaneC
         if (normal.magnitude == 0.0f)
             return 0.0f;
 
-        return MathF.Abs(planeEquation / normal.magnitude);
+        return planeEquation / normal.magnitude;
     }
     #endregion
 

@@ -89,7 +89,8 @@ public class AA1_ParticleSystem
         public float lifeTime; 
 
         public Vector3C force;
-        
+
+        public Vector3C lastPos;
         public Vector3C position;
         public Vector3C velocity;
         public Vector3C aceleration;
@@ -177,11 +178,21 @@ public class AA1_ParticleSystem
             {
                 float distance = planes[j].DistanceToPoint(position);
 
-                if (distance <= size + 0.05f && !hasCollisioned)
+                if (distance <= size + 0.05f && distance > 0.0f && !hasCollisioned)
                 {
                     hasCollisioned = true;
                     CollisionPlaneReaction(planes[j], settings);
                     return true;
+                }
+                else if(distance <= 0.0f)
+                {
+                    //LineC trajectory = LineC.CreateLineFromTwoPoints(lastPos, position);
+
+                    //position = trajectory.NearestPoint(planes[j].position);
+
+                    //hasCollisioned = true;
+                    //CollisionPlaneReaction(planes[j], settings);
+                    //return true;
                 }
             }
             hasCollisioned = false;

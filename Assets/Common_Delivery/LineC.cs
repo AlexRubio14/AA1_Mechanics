@@ -36,7 +36,7 @@ public struct LineC
     public Vector3C NearestPoint(Vector3C point)
     {
         Vector3C vector = point - origin;
-        float dot = Vector3C.Dot(vector, direction);
+        float dot = Vector3C.Dot(direction, vector);
         Vector3C nearestPoint = origin - direction * dot;
 
         return nearestPoint;
