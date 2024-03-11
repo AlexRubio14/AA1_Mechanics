@@ -1,5 +1,5 @@
 using System;
-using static UnityEditor.Rendering.ShadowCascadeGUI;
+using UnityEngine.Rendering;
 
 [System.Serializable]
 public class AA1_ParticleSystem
@@ -160,6 +160,57 @@ public class AA1_ParticleSystem
             // Clean forces
             this.force = Vector3C.zero;
         }
+
+        public void CheckCollisions(SettingsCollision settingsCollision, Settings settings)
+        {
+            if (CheckPlanesCollision(settingsCollision.planes, settings)) { return; }
+
+            //if (CheckSpheresCollision(settingsCollision.spheres, settings)) { return; }
+
+            //if (CheckCapsulesCollision(settingsCollision.capsules, settings)) { return; }
+        }
+
+        public bool CheckPlanesCollision(PlaneC[] planes, Settings settings)
+        {
+            
+            for (int j = 0; j < planes.Length; j++)
+            {
+                float distance = planes[j].DistanceToPoint(position);
+
+                if (distance <= size + 0.05f && !hasCollisioned)
+                {
+                    hasCollisioned = true;
+                    CollisionPlaneReaction(planes[j], settings);
+                    return true;
+                }
+            }
+            hasCollisioned = false;
+            return false;
+        }
+
+        //public bool CheckSpheresCollision(SphereC[] spheres, Settings settings)
+        //{
+        //    return true;
+        //}
+
+        //public bool CheckCapsulesCollision(CapsuleC[] capsules, Settings settings)
+        //{
+        //    return true;
+        //}
+
+        public void CollisionPlaneReaction(PlaneC plane, Settings settings)
+        {
+            // 1 calcular Vn (contrario a la normal)
+            if (velocity.magnitude == 0.0f)
+                return;
+
+            float projection = Vector3C.Dot(plane.normal, velocity) / MathF.Abs(velocity.magnitude);
+
+            Vector3C Vn = velocity.normalized * projection;
+
+            // 2 Calcular rebote
+            velocity = (-Vn + (velocity - Vn)) * settings.bounce;
+        }
     }
 
     bool start = true;
@@ -190,7 +241,10 @@ public class AA1_ParticleSystem
                 }
                 particles[i].lifeTime -= dt;
 
-                // 2. Calcular euler
+                // 2. Calcular si hay colision
+                particles[i].CheckCollisions(settingsCollision, settings);
+
+                // 3. Calcular euler
                 particles[i].Euler(settings, dt);
             }
         }
@@ -228,6 +282,7 @@ public class AA1_ParticleSystem
 
         return 1.0f;
     }
+
 
     public int RandomParticlesToSpawn()
     {
@@ -267,6 +322,8 @@ public class AA1_ParticleSystem
         // 4. Comprobar que el pool count no sobrepase la array
         if (settings.poolIndex >= settings.objectPoolingParticles) { settings.poolIndex = 0; }
     }
+
+
 
     public void Debug()
     {

@@ -165,7 +165,7 @@ MonoBehaviour:
         x: 0
         y: -9.81
         z: 0
-      bounce: 0
+      bounce: 1
     settingsCascade:
       PointA:
         x: 0
@@ -182,8 +182,8 @@ MonoBehaviour:
       randomDirection: 0
       minImpulse: 10
       maxImpulse: 10
-      minParticlesPerSecond: 10
-      maxParticlesPerSecond: 100
+      minParticlesPerSecond: 50
+      maxParticlesPerSecond: 50
       minParticlesLifeTime: 1
       maxParticlesLifeTime: 1
     settingsCannon:
@@ -210,7 +210,7 @@ MonoBehaviour:
           z: 0
         normal:
           x: 0
-          y: 1
+          y: -1
           z: 0
       - position:
           x: 0.5
@@ -220,6 +220,38 @@ MonoBehaviour:
           x: 1
           y: 0
           z: 0
+      - position:
+          x: 0
+          y: 0.5
+          z: 0
+        normal:
+          x: 0
+          y: 1
+          z: 0
+      - position:
+          x: -0.5
+          y: 0
+          z: 0
+        normal:
+          x: -1
+          y: 0
+          z: 0
+      - position:
+          x: 0
+          y: 0
+          z: 0.5
+        normal:
+          x: 0
+          y: 0
+          z: 1
+      - position:
+          x: 0
+          y: 0
+          z: -0.5
+        normal:
+          x: 0
+          y: 0
+          z: -1
       spheres:
       - position:
           x: 0
@@ -283,7 +315,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 201036327}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.5, y: 0, z: 0.5}
+  m_LocalPosition: {x: -0.261, y: 0, z: 0.369}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -945,7 +977,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2040244666}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.5, y: 0, z: -0.5}
+  m_LocalPosition: {x: 0.235, y: 0, z: -0.304}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

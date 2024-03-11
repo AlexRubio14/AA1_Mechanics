@@ -41,20 +41,10 @@ public struct PlaneC
     //ToEquation(Ax + By + Cz + D = 0)
     public (float A, float B, float C, float D) ToEquation()
     {
-        return (0, 0, 0, 0);
+        float d = (- (normal.x * position.x) - (normal.y * position.y) - (normal.z * position.z));
+
+        return (normal.x, normal.y, normal.z, d);
     }
-
-    ////Intersection
-    //public Vector3C IntersectionWithLine(LineC line)
-    //{
-    //    if (Vector3C.Dot(line.direction, normal) == 0)
-    //    {
-    //        return line.origin;
-    //    }
-
-
-    //    return;
-    //}
 
     public override bool Equals(object obj)
     {
@@ -66,13 +56,14 @@ public struct PlaneC
         return false;
     }
 
-    public float DistanceToPoint()
+    public float DistanceToPoint(Vector3C point)
     {
-        float distance;
+        float planeEquation = ToEquation().A * point.x + ToEquation().B * point.y + ToEquation().C * point.z + ToEquation().D;
 
+        if (normal.magnitude == 0.0f)
+            return 0.0f;
 
-
-        return distance;
+        return MathF.Abs(planeEquation / normal.magnitude);
     }
     #endregion
 
