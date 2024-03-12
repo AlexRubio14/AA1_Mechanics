@@ -195,11 +195,11 @@ MonoBehaviour:
         x: 0
         y: 0
         z: 0
-      openingAngle: 15
+      openingAngle: 30
       minImpulse: 800
       maxImpulse: 800
-      minParticlesPerSecond: 50
-      maxParticlesPerSecond: 50
+      minParticlesPerSecond: 10
+      maxParticlesPerSecond: 10
       minParticlesLifeTime: 1
       maxParticlesLifeTime: 1
     settingsCollision:

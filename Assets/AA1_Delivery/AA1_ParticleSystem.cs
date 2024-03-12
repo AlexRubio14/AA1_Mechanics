@@ -135,17 +135,16 @@ public class AA1_ParticleSystem
 
             position = settingsCannon.Start;
 
-            float randomImpulse = RandomRangeFloats(settingsCannon.minImpulse, settingsCannon.maxImpulse);
+            Vector3C direction;
+            float dot; 
+            do
+            {
+                direction = new Vector3C(RandomRangeFloats(-1, 1), RandomRangeFloats(-1, 1), RandomRangeFloats(-1, 1)).normalized;
+                dot = Vector3C.Dot(settingsCannon.Direction.normalized, direction);
 
-            float randomAngleX = RandomRangeFloats(-settingsCannon.openingAngle * ((float)Math.PI / 180.0f), settingsCannon.openingAngle * ((float)Math.PI / 180.0f));
-            float randomAngleY = RandomRangeFloats(-settingsCannon.openingAngle * ((float)Math.PI / 180.0f), settingsCannon.openingAngle * ((float)Math.PI / 180.0f));
+            } while (dot < (1 - settingsCannon.openingAngle / 360));
 
-            Vector3C temp = new Vector3C(
-                (float)Math.Cos(randomAngleX) * randomImpulse, 
-                (float)Math.Sin(randomAngleY) * randomImpulse,
-                randomImpulse);
-
-            force = temp * settingsCannon.Direction.normalized; 
+            force = direction * RandomRangeFloats(settingsCannon.minImpulse, settingsCannon.maxImpulse); ;
         }
         private static float RandomRangeFloats(float min, float max)
         {
@@ -198,7 +197,7 @@ public class AA1_ParticleSystem
                 if (distance < 0.0f)
                 {
                     // 2. Recolocamos la particula 
-                    position = planes[i].IntersectionWithLine( new LineC(lastPos, position));
+                    position = planes[i].IntersectionWithLine(new LineC(lastPos, position));
 
                     // 3. Colision
                     CollisionPlaneReaction(planes[i], settings);
@@ -214,7 +213,7 @@ public class AA1_ParticleSystem
             {
                 if (spheres[i].IsInside(position))
                 {
-                    position = spheres[i].IntersectionWithLine(position);
+                    position = spheres[i].IntersectionWithLine(new LineC(lastPos, position));
 
                     CollisionSphereReaction(spheres[i], settings);
                     return true;

@@ -47,22 +47,23 @@ public struct SphereC
         return nearestPoint;
     }
 
-    public Vector3C IntersectionWithLine(Vector3C point)
+    public Vector3C IntersectionWithLine(LineC line)
     {
-        LineC line = new LineC(point, Vector3C.CreateVector3(point, position));
         Vector3C L = line.origin - position;
 
-        Vector3C vector = new Vector3C(Vector3C.Dot(line.direction, line.direction), 2 * Vector3C.Dot(line.direction, L), Vector3C.Dot(L,L) - (radius * radius));
+        float A = Vector3C.Dot(line.direction, line.direction);
+        float B = Vector3C.Dot((line.direction * 2), L);
+        float C = Vector3C.Dot(L, L) - (radius * radius); 
 
-        float discriminant = vector.y * vector.y - 4 * vector.x * vector.z;
+        float discriminant = B * B - 4 * A * C;
 
         if (discriminant < 0)
             return Vector3C.zero;
 
         discriminant = (float)MathF.Sqrt(discriminant);
 
-        float t1 = (-vector.y + discriminant) / (2 * vector.x);
-        float t2 = (-vector.y - discriminant) / (2 * vector.x);
+        float t1 = (-B + discriminant) / (2 * A);
+        float t2 = (-B - discriminant) / (2 * A);
 
         Vector3C intersectionPoint1 = line.origin + line.direction * t1;
         Vector3C intersectionPoint2 = line.origin + line.direction * t2;
