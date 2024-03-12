@@ -1,5 +1,6 @@
 using System;
 using UnityEngine.Rendering;
+using static AA1_ParticleSystem;
 
 [System.Serializable]
 public class AA1_ParticleSystem
@@ -97,28 +98,28 @@ public class AA1_ParticleSystem
 
         public void InitParticle(SettingsParticle settings)
         {
-            this.active = true;
+            active = true;
 
-            this.size = settings.size;
-            this.mass = settings.mass;
+            size = settings.size;
+            mass = settings.mass;
 
-            this.aceleration = Vector3C.zero;
-            this.velocity = Vector3C.zero;
+            aceleration = Vector3C.zero;
+            velocity = Vector3C.zero;
         }
 
         public void InitParticleInCascade(SettingsCascade settingsCascade, SettingsParticle settingsParticle)
         {
             Random rnd = new Random();
 
-            this.InitParticle(settingsParticle);
+            InitParticle(settingsParticle);
 
-            this.lifeTime = rnd.Next((int)settingsCascade.minParticlesLifeTime, (int)settingsCascade.maxParticlesLifeTime);
+            lifeTime = rnd.Next((int)settingsCascade.minParticlesLifeTime, (int)settingsCascade.maxParticlesLifeTime);
 
             LineC lineBetweenCascades = LineC.CreateLineFromTwoPoints(settingsCascade.PointA, settingsCascade.PointB);
             // EQ. PARAMETRICA: r(x) = B + x * direction x = 0..1
-            this.position = lineBetweenCascades.origin + (lineBetweenCascades.direction * (float)rnd.NextDouble());
+            position = lineBetweenCascades.origin + (lineBetweenCascades.direction * (float)rnd.NextDouble());
 
-            this.force = new Vector3C
+            force = new Vector3C
                 (rnd.Next((int)(settingsCascade.Direction.x * settingsCascade.minImpulse), (int)(settingsCascade.Direction.x * settingsCascade.maxImpulse)),
                 rnd.Next((int)(settingsCascade.Direction.y * settingsCascade.minImpulse), (int)(settingsCascade.Direction.y * settingsCascade.maxImpulse)),
                 rnd.Next((int)(settingsCascade.Direction.z * settingsCascade.minImpulse), (int)(settingsCascade.Direction.z * settingsCascade.maxImpulse)));
@@ -128,13 +129,28 @@ public class AA1_ParticleSystem
         {
             Random rnd = new Random();
 
-            this.InitParticle(settingsParticle);
+            InitParticle(settingsParticle);
 
-            this.lifeTime = rnd.Next((int)settingsCannon.minParticlesLifeTime, (int)settingsCannon.maxParticlesLifeTime);
+            lifeTime = rnd.Next((int)settingsCannon.minParticlesLifeTime, (int)settingsCannon.maxParticlesLifeTime);
 
-            this.position = settingsCannon.Start;
+            position = settingsCannon.Start;
 
-            this.force = Vector3C.zero;
+            float randomImpulse = RandomRangeFloats(settingsCannon.minImpulse, settingsCannon.maxImpulse);
+
+            float randomAngleX = RandomRangeFloats(-settingsCannon.openingAngle * ((float)Math.PI / 180.0f), settingsCannon.openingAngle * ((float)Math.PI / 180.0f));
+            float randomAngleY = RandomRangeFloats(-settingsCannon.openingAngle * ((float)Math.PI / 180.0f), settingsCannon.openingAngle * ((float)Math.PI / 180.0f));
+
+            Vector3C temp = new Vector3C(
+                (float)Math.Cos(randomAngleX) * randomImpulse, 
+                (float)Math.Sin(randomAngleX) * randomImpulse,
+                randomImpulse);
+
+            force = temp * settingsCannon.Direction.normalized; 
+        }
+        private static float RandomRangeFloats(float min, float max)
+        {
+            Random rnd = new Random();
+            return (float)rnd.NextDouble() * (max - min) + min;
         }
 
         public bool CheckLifeTime()
@@ -149,6 +165,8 @@ public class AA1_ParticleSystem
 
         public void Euler(Settings settings, float dt)
         {
+            this.lastPos = this.position;
+
             // Apply forces
             this.force += settings.gravity;
 
@@ -156,7 +174,6 @@ public class AA1_ParticleSystem
             this.aceleration = this.force / this.mass;
             this.velocity = this.velocity + this.aceleration * dt;
             this.position = this.position + this.velocity * dt;
-            this.force = Vector3C.zero;
 
             // Clean forces
             this.force = Vector3C.zero;
@@ -173,29 +190,21 @@ public class AA1_ParticleSystem
 
         public bool CheckPlanesCollision(PlaneC[] planes, Settings settings)
         {
-            
-            for (int j = 0; j < planes.Length; j++)
+            for (int i = 0; i < planes.Length; i++)
             {
-                float distance = planes[j].DistanceToPoint(position);
+                // 1. Distance
+                double distance = planes[i].DistanceToPoint(position);
 
-                if (distance <= size + 0.05f && distance > 0.0f && !hasCollisioned)
+                if (distance < 0.0f)
                 {
-                    hasCollisioned = true;
-                    CollisionPlaneReaction(planes[j], settings);
+                    // 2. Recolocamos la particula 
+                    position = planes[i].IntersectionWithLine( new LineC(lastPos, position));
+
+                    // 3. Colision
+                    CollisionPlaneReaction(planes[i], settings);
                     return true;
                 }
-                else if(distance <= 0.0f)
-                {
-                    //LineC trajectory = LineC.CreateLineFromTwoPoints(lastPos, position);
-
-                    //position = trajectory.NearestPoint(planes[j].position);
-
-                    //hasCollisioned = true;
-                    //CollisionPlaneReaction(planes[j], settings);
-                    //return true;
-                }
             }
-            hasCollisioned = false;
             return false;
         }
 
@@ -211,16 +220,8 @@ public class AA1_ParticleSystem
 
         public void CollisionPlaneReaction(PlaneC plane, Settings settings)
         {
-            // 1 calcular Vn (contrario a la normal)
-            if (velocity.magnitude == 0.0f)
-                return;
-
-            float projection = Vector3C.Dot(plane.normal, velocity) / MathF.Abs(velocity.magnitude);
-
-            Vector3C Vn = velocity.normalized * projection;
-
-            // 2 Calcular rebote
-            velocity = (-Vn + (velocity - Vn)) * settings.bounce;
+            Vector3C Vn = plane.normal.normalized * Vector3C.Dot(velocity, plane.normal);
+            velocity = ((velocity - Vn) - Vn) * settings.bounce;
         }
     }
 
@@ -252,11 +253,11 @@ public class AA1_ParticleSystem
                 }
                 particles[i].lifeTime -= dt;
 
-                // 2. Calcular si hay colision
-                particles[i].CheckCollisions(settingsCollision, settings);
-
-                // 3. Calcular euler
+                // 2. Calculate new position
                 particles[i].Euler(settings, dt);
+
+                // 3. Check colisions
+                particles[i].CheckCollisions(settingsCollision, settings);
             }
         }
 

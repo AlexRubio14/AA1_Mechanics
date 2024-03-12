@@ -58,12 +58,12 @@ public struct PlaneC
 
     public float DistanceToPoint(Vector3C point)
     {
-        float planeEquation = ToEquation().A * point.x + ToEquation().B * point.y + ToEquation().C * point.z + ToEquation().D;
-
-        if (normal.magnitude == 0.0f)
-            return 0.0f;
-
-        return planeEquation / normal.magnitude;
+        return Vector3C.Dot(normal, (point - position));
+    }
+    public Vector3C IntersectionWithLine(LineC line)
+    {
+        float distance = Vector3C.Dot(normal, position - line.origin) / Vector3C.Dot(normal, line.direction);
+        return line.origin + line.direction * distance;
     }
     #endregion
 

@@ -165,7 +165,7 @@ MonoBehaviour:
         x: 0
         y: -9.81
         z: 0
-      bounce: 1
+      bounce: 0.8
     settingsCascade:
       PointA:
         x: 0
@@ -176,16 +176,16 @@ MonoBehaviour:
         y: 0
         z: 0
       Direction:
-        x: 10
-        y: 15
-        z: 10
+        x: 5
+        y: 10
+        z: 5
       randomDirection: 0
-      minImpulse: 50
-      maxImpulse: 50
-      minParticlesPerSecond: 1
-      maxParticlesPerSecond: 1
+      minImpulse: 25
+      maxImpulse: 25
+      minParticlesPerSecond: 300
+      maxParticlesPerSecond: 300
       minParticlesLifeTime: 1
-      maxParticlesLifeTime: 1
+      maxParticlesLifeTime: 3
     settingsCannon:
       Start:
         x: 0
@@ -195,13 +195,13 @@ MonoBehaviour:
         x: 0
         y: 0
         z: 0
-      openingAngle: 0
-      minImpulse: 0
-      maxImpulse: 0
-      minParticlesPerSecond: 0
-      maxParticlesPerSecond: 0
-      minParticlesLifeTime: 0
-      maxParticlesLifeTime: 0
+      openingAngle: 15
+      minImpulse: 800
+      maxImpulse: 800
+      minParticlesPerSecond: 50
+      maxParticlesPerSecond: 50
+      minParticlesLifeTime: 1
+      maxParticlesLifeTime: 1
     settingsCollision:
       planes:
       - position:
@@ -210,14 +210,14 @@ MonoBehaviour:
           z: 0
         normal:
           x: 0
-          y: -1
+          y: 1
           z: 0
       - position:
           x: 0.5
           y: 0
           z: 0
         normal:
-          x: 1
+          x: -1
           y: 0
           z: 0
       - position:
@@ -226,14 +226,14 @@ MonoBehaviour:
           z: 0
         normal:
           x: 0
-          y: 1
+          y: -1
           z: 0
       - position:
           x: -0.5
           y: 0
           z: 0
         normal:
-          x: -1
+          x: 1
           y: 0
           z: 0
       - position:
@@ -243,7 +243,7 @@ MonoBehaviour:
         normal:
           x: 0
           y: 0
-          z: 1
+          z: -1
       - position:
           x: 0
           y: 0
@@ -251,7 +251,7 @@ MonoBehaviour:
         normal:
           x: 0
           y: 0
-          z: -1
+          z: 1
       spheres:
       - position:
           x: 0
@@ -269,7 +269,7 @@ MonoBehaviour:
           z: 0.2
         radius: 0.1
     settingsParticle:
-      size: 0.03
+      size: 0.02
       mass: 0.5
     emissionMode:
       mode: 0
