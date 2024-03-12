@@ -48,7 +48,7 @@ public struct PlaneC
 
     public override bool Equals(object obj)
     {
-        if (obj is Vector3C)
+        if (obj is PlaneC)
         {
             PlaneC other = (PlaneC)obj;
             return other.normal == this.normal;
