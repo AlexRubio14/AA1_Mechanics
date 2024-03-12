@@ -182,8 +182,8 @@ MonoBehaviour:
       randomDirection: 0
       minImpulse: 25
       maxImpulse: 25
-      minParticlesPerSecond: 300
-      maxParticlesPerSecond: 300
+      minParticlesPerSecond: 1
+      maxParticlesPerSecond: 1
       minParticlesLifeTime: 1
       maxParticlesLifeTime: 3
     settingsCannon:
@@ -254,9 +254,9 @@ MonoBehaviour:
           z: 1
       spheres:
       - position:
-          x: 0
-          y: 0
-          z: 0
+          x: 0.3
+          y: -0.3
+          z: 0.3
         radius: 0.3
       capsules:
       - positionA:

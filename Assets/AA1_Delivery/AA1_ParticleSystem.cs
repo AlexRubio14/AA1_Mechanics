@@ -142,7 +142,7 @@ public class AA1_ParticleSystem
 
             Vector3C temp = new Vector3C(
                 (float)Math.Cos(randomAngleX) * randomImpulse, 
-                (float)Math.Sin(randomAngleX) * randomImpulse,
+                (float)Math.Sin(randomAngleY) * randomImpulse,
                 randomImpulse);
 
             force = temp * settingsCannon.Direction.normalized; 
@@ -183,7 +183,7 @@ public class AA1_ParticleSystem
         {
             if (CheckPlanesCollision(settingsCollision.planes, settings)) { return; }
 
-            //if (CheckSpheresCollision(settingsCollision.spheres, settings)) { return; }
+            if (CheckSpheresCollision(settingsCollision.spheres, settings)) { return; }
 
             //if (CheckCapsulesCollision(settingsCollision.capsules, settings)) { return; }
         }
@@ -208,10 +208,21 @@ public class AA1_ParticleSystem
             return false;
         }
 
-        //public bool CheckSpheresCollision(SphereC[] spheres, Settings settings)
-        //{
-        //    return true;
-        //}
+        public bool CheckSpheresCollision(SphereC[] spheres, Settings settings)
+        {
+            for(int i = 0; i < spheres.Length; i++)
+            {
+                if (spheres[i].IsInside(position))
+                {
+                    position = spheres[i].IntersectionWithLine(position);
+
+                    CollisionSphereReaction(spheres[i], settings);
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         //public bool CheckCapsulesCollision(CapsuleC[] capsules, Settings settings)
         //{
@@ -220,6 +231,15 @@ public class AA1_ParticleSystem
 
         public void CollisionPlaneReaction(PlaneC plane, Settings settings)
         {
+            Vector3C Vn = plane.normal.normalized * Vector3C.Dot(velocity, plane.normal);
+            velocity = ((velocity - Vn) - Vn) * settings.bounce;
+        }
+
+        public void CollisionSphereReaction(SphereC sphere, Settings settings)
+        {
+            Vector3C normal = Vector3C.CreateVector3(sphere.position, position).normalized;
+            PlaneC plane = new PlaneC(position, normal);
+
             Vector3C Vn = plane.normal.normalized * Vector3C.Dot(velocity, plane.normal);
             velocity = ((velocity - Vn) - Vn) * settings.bounce;
         }
@@ -294,7 +314,6 @@ public class AA1_ParticleSystem
 
         return 1.0f;
     }
-
 
     public int RandomParticlesToSpawn()
     {
