@@ -118,10 +118,12 @@ public class AA1_ParticleSystem
             // EQ. PARAMETRICA: r(x) = B + x * direction x = 0..1
             position = lineBetweenCascades.origin + (lineBetweenCascades.direction * (float)rnd.NextDouble());
 
+            Vector3C cascadeDirection = settingsCascade.Direction.normalized;
+
             force = new Vector3C
-                (rnd.Next((int)(settingsCascade.Direction.x * settingsCascade.minImpulse), (int)(settingsCascade.Direction.x * settingsCascade.maxImpulse)),
-                rnd.Next((int)(settingsCascade.Direction.y * settingsCascade.minImpulse), (int)(settingsCascade.Direction.y * settingsCascade.maxImpulse)),
-                rnd.Next((int)(settingsCascade.Direction.z * settingsCascade.minImpulse), (int)(settingsCascade.Direction.z * settingsCascade.maxImpulse)));
+                (rnd.Next((int)(cascadeDirection.x * settingsCascade.minImpulse), (int)(cascadeDirection.x * settingsCascade.maxImpulse)),
+                rnd.Next((int)(cascadeDirection.y * settingsCascade.minImpulse), (int)(cascadeDirection.y * settingsCascade.maxImpulse)),
+                rnd.Next((int)(cascadeDirection.z * settingsCascade.minImpulse), (int)(cascadeDirection.z * settingsCascade.maxImpulse)));
         }
 
         public void InitParticleInCannon(SettingsCannon settingsCannon, SettingsParticle settingsParticle)
@@ -138,6 +140,15 @@ public class AA1_ParticleSystem
             float dot; 
             do
             {
+                if(settingsCannon.openingAngle <= 0)
+                {
+                    settingsCannon.openingAngle = 1;
+                }
+                else if(settingsCannon.openingAngle > 360)
+                {
+                    settingsCannon.openingAngle %= 360;
+                }
+
                 direction = new Vector3C(RandomRangeFloats(-1, 1), RandomRangeFloats(-1, 1), RandomRangeFloats(-1, 1)).normalized;
                 dot = Vector3C.Dot(settingsCannon.Direction.normalized, direction);
 

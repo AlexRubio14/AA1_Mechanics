@@ -180,10 +180,10 @@ MonoBehaviour:
         y: 10
         z: 5
       randomDirection: 0
-      minImpulse: 25
-      maxImpulse: 25
-      minParticlesPerSecond: 1
-      maxParticlesPerSecond: 1
+      minImpulse: 250
+      maxImpulse: 250
+      minParticlesPerSecond: 50
+      maxParticlesPerSecond: 50
       minParticlesLifeTime: 1
       maxParticlesLifeTime: 3
     settingsCannon:
