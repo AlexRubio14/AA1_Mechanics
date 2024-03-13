@@ -1,5 +1,4 @@
 using System;
-using UnityEngine.Rendering;
 using static AA1_ParticleSystem;
 
 [System.Serializable]
@@ -154,9 +153,9 @@ public class AA1_ParticleSystem
 
         public bool CheckLifeTime()
         {
-            if(this.lifeTime < 0.0f)
+            if(lifeTime < 0.0f)
             {
-                this.active = false;
+                active = false;
                 return true;
             }
             return false;
@@ -164,81 +163,93 @@ public class AA1_ParticleSystem
 
         public void Euler(Settings settings, float dt)
         {
-            this.lastPos = this.position;
+            lastPos = position;
 
             // Apply forces
-            this.force += settings.gravity;
+            force += settings.gravity;
 
             // Calculate acceleration, velocity and position
-            this.aceleration = this.force / this.mass;
-            this.velocity = this.velocity + this.aceleration * dt;
-            this.position = this.position + this.velocity * dt;
+            aceleration = force / mass;
+            velocity = velocity + aceleration * dt;
+            position = position + velocity * dt;
 
             // Clean forces
-            this.force = Vector3C.zero;
+            force = Vector3C.zero;
         }
 
         public void CheckCollisions(SettingsCollision settingsCollision, Settings settings)
         {
-            if (CheckPlanesCollision(settingsCollision.planes, settings)) { return; }
+            if (CheckPlanes(settingsCollision.planes, settings)) { return; }
 
-            if (CheckSpheresCollision(settingsCollision.spheres, settings)) { return; }
+            if (CheckSpheres(settingsCollision.spheres, settings)) { return; }
 
-            //if (CheckCapsulesCollision(settingsCollision.capsules, settings)) { return; }
+            if (CheckCapsules(settingsCollision.capsules, settings)) { return; }
         }
 
-        public bool CheckPlanesCollision(PlaneC[] planes, Settings settings)
+        public bool CheckPlanes(PlaneC[] planes, Settings settings)
         {
-            for (int i = 0; i < planes.Length; i++)
+            foreach(PlaneC plane in planes)
             {
-                // 1. Distance
-                double distance = planes[i].DistanceToPoint(position);
-
-                if (distance < 0.0f)
-                {
-                    // 2. Recolocamos la particula 
-                    position = planes[i].IntersectionWithLine(new LineC(lastPos, position));
-
-                    // 3. Colision
-                    CollisionPlaneReaction(planes[i], settings);
+                if(CollisionPlane(plane, settings))
                     return true;
-                }
             }
             return false;
         }
 
-        public bool CheckSpheresCollision(SphereC[] spheres, Settings settings)
+        public bool CollisionPlane(PlaneC plane, Settings settings)
+        {
+            // 1. Distance
+            double distance = plane.DistanceToPoint(position);
+
+            if (distance < 0.0f)
+            {
+                // 2. Recolocamos la particula 
+                position = plane.IntersectionWithLine(new LineC(lastPos, position));
+
+                // 3. Colision
+                CollisionPlaneReaction(plane, settings);
+                return true;
+            }
+            return false;
+        }
+
+        public bool CheckSpheres(SphereC[] spheres, Settings settings)
         {
             for(int i = 0; i < spheres.Length; i++)
             {
-                if (spheres[i].IsInside(position))
-                {
-                    position = spheres[i].IntersectionWithLine(new LineC(lastPos, position));
+                // Find the plane
+                Vector3C normalizedDistance = (position - spheres[i].position).normalized;
+                PlaneC plane = new PlaneC(spheres[i].position + normalizedDistance * spheres[i].radius, normalizedDistance);
 
-                    CollisionSphereReaction(spheres[i], settings);
+                if (CollisionPlane(plane, settings))
                     return true;
-                }
             }
-
             return false;
         }
 
-        //public bool CheckCapsulesCollision(CapsuleC[] capsules, Settings settings)
-        //{
-        //    return true;
-        //}
+        public bool CheckCapsules(CapsuleC[] capsules, Settings settings)
+        {
+            for (int i = 0; i < capsules.Length; i++)
+            {
+                Vector3C capsuleDistance = capsules[i].positionB - capsules[i].positionA;
+                Vector3C particleDistance = position - capsules[i].positionA;
+
+                float projection = Vector3C.Dot(capsuleDistance.normalized, particleDistance);
+
+                Vector3C collisionPoint = capsules[i].positionA + capsuleDistance.normalized * projection;
+
+                Vector3C a = position - collisionPoint;
+
+                PlaneC plane = new PlaneC(collisionPoint + a.normalized * capsules[i].radius, a.normalized);
+
+                if(CollisionPlane(plane, settings))
+                    return true;
+            }
+            return false;
+        }
 
         public void CollisionPlaneReaction(PlaneC plane, Settings settings)
         {
-            Vector3C Vn = plane.normal.normalized * Vector3C.Dot(velocity, plane.normal);
-            velocity = ((velocity - Vn) - Vn) * settings.bounce;
-        }
-
-        public void CollisionSphereReaction(SphereC sphere, Settings settings)
-        {
-            Vector3C normal = Vector3C.CreateVector3(sphere.position, position).normalized;
-            PlaneC plane = new PlaneC(position, normal);
-
             Vector3C Vn = plane.normal.normalized * Vector3C.Dot(velocity, plane.normal);
             velocity = ((velocity - Vn) - Vn) * settings.bounce;
         }

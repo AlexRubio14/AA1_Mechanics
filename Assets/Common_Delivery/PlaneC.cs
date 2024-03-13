@@ -37,6 +37,7 @@ public struct PlaneC
         this.normal = n;
     }
     #endregion
+
     #region METHODS
     //ToEquation(Ax + By + Cz + D = 0)
     public (float A, float B, float C, float D) ToEquation()

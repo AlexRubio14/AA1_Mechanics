@@ -260,14 +260,14 @@ MonoBehaviour:
         radius: 0.3
       capsules:
       - positionA:
-          x: 0
-          y: 0.24
+          x: -0.3
+          y: -0.3
           z: 0.28
         positionB:
-          x: 0
-          y: 0.75
-          z: 0.2
-        radius: 0.1
+          x: -0.3
+          y: 0
+          z: -0.3
+        radius: 0.15
     settingsParticle:
       size: 0.02
       mass: 0.5
