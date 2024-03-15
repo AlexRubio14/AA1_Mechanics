@@ -180,10 +180,10 @@ MonoBehaviour:
         y: 10
         z: 5
       randomDirection: 0
-      minImpulse: 25
-      maxImpulse: 25
-      minParticlesPerSecond: 300
-      maxParticlesPerSecond: 300
+      minImpulse: 250
+      maxImpulse: 250
+      minParticlesPerSecond: 50
+      maxParticlesPerSecond: 50
       minParticlesLifeTime: 1
       maxParticlesLifeTime: 3
     settingsCannon:
@@ -195,11 +195,11 @@ MonoBehaviour:
         x: 0
         y: 0
         z: 0
-      openingAngle: 15
+      openingAngle: 30
       minImpulse: 800
       maxImpulse: 800
-      minParticlesPerSecond: 50
-      maxParticlesPerSecond: 50
+      minParticlesPerSecond: 10
+      maxParticlesPerSecond: 10
       minParticlesLifeTime: 1
       maxParticlesLifeTime: 1
     settingsCollision:
@@ -254,20 +254,20 @@ MonoBehaviour:
           z: 1
       spheres:
       - position:
-          x: 0
-          y: 0
-          z: 0
+          x: 0.3
+          y: -0.3
+          z: 0.3
         radius: 0.3
       capsules:
       - positionA:
-          x: 0
-          y: 0.24
+          x: -0.3
+          y: -0.3
           z: 0.28
         positionB:
-          x: 0
-          y: 0.75
-          z: 0.2
-        radius: 0.1
+          x: -0.3
+          y: 0
+          z: -0.3
+        radius: 0.15
     settingsParticle:
       size: 0.02
       mass: 0.5

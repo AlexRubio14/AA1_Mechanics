@@ -1,4 +1,3 @@
-using System;
 
 [System.Serializable]
 public struct PlaneC
@@ -37,6 +36,7 @@ public struct PlaneC
         this.normal = n;
     }
     #endregion
+
     #region METHODS
     //ToEquation(Ax + By + Cz + D = 0)
     public (float A, float B, float C, float D) ToEquation()
@@ -48,7 +48,7 @@ public struct PlaneC
 
     public override bool Equals(object obj)
     {
-        if (obj is Vector3C)
+        if (obj is PlaneC)
         {
             PlaneC other = (PlaneC)obj;
             return other.normal == this.normal;

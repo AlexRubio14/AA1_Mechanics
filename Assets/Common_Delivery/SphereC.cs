@@ -1,4 +1,3 @@
-using System;
 
 [System.Serializable]
 public struct SphereC
@@ -9,15 +8,26 @@ public struct SphereC
     #endregion
 
     #region PROPIERTIES
+    public SphereC unitary
+    {
+        get
+        {
+            radius = 1.0f;
+            return new SphereC(position, radius);
+        }
+    }
     #endregion
 
     #region CONSTRUCTORS
-    #endregion
-
-    #region OPERATORS
+    public SphereC(Vector3C position, float radius)
+    {
+        this.position = position; this.radius = radius;
+    }
     #endregion
 
     #region METHODS
+
+   
     #endregion
 
     #region FUNCTIONS

@@ -1,5 +1,4 @@
 using System;
-using UnityEngine.Rendering;
 using static AA1_ParticleSystem;
 
 [System.Serializable]
@@ -119,10 +118,12 @@ public class AA1_ParticleSystem
             // EQ. PARAMETRICA: r(x) = B + x * direction x = 0..1
             position = lineBetweenCascades.origin + (lineBetweenCascades.direction * (float)rnd.NextDouble());
 
+            Vector3C cascadeDirection = settingsCascade.Direction.normalized;
+
             force = new Vector3C
-                (rnd.Next((int)(settingsCascade.Direction.x * settingsCascade.minImpulse), (int)(settingsCascade.Direction.x * settingsCascade.maxImpulse)),
-                rnd.Next((int)(settingsCascade.Direction.y * settingsCascade.minImpulse), (int)(settingsCascade.Direction.y * settingsCascade.maxImpulse)),
-                rnd.Next((int)(settingsCascade.Direction.z * settingsCascade.minImpulse), (int)(settingsCascade.Direction.z * settingsCascade.maxImpulse)));
+                (rnd.Next((int)(cascadeDirection.x * settingsCascade.minImpulse), (int)(cascadeDirection.x * settingsCascade.maxImpulse)),
+                rnd.Next((int)(cascadeDirection.y * settingsCascade.minImpulse), (int)(cascadeDirection.y * settingsCascade.maxImpulse)),
+                rnd.Next((int)(cascadeDirection.z * settingsCascade.minImpulse), (int)(cascadeDirection.z * settingsCascade.maxImpulse)));
         }
 
         public void InitParticleInCannon(SettingsCannon settingsCannon, SettingsParticle settingsParticle)
@@ -135,17 +136,25 @@ public class AA1_ParticleSystem
 
             position = settingsCannon.Start;
 
-            float randomImpulse = RandomRangeFloats(settingsCannon.minImpulse, settingsCannon.maxImpulse);
+            Vector3C direction;
+            float dot; 
+            do
+            {
+                if(settingsCannon.openingAngle <= 0)
+                {
+                    settingsCannon.openingAngle = 1;
+                }
+                else if(settingsCannon.openingAngle > 360)
+                {
+                    settingsCannon.openingAngle %= 360;
+                }
 
-            float randomAngleX = RandomRangeFloats(-settingsCannon.openingAngle * ((float)Math.PI / 180.0f), settingsCannon.openingAngle * ((float)Math.PI / 180.0f));
-            float randomAngleY = RandomRangeFloats(-settingsCannon.openingAngle * ((float)Math.PI / 180.0f), settingsCannon.openingAngle * ((float)Math.PI / 180.0f));
+                direction = new Vector3C(RandomRangeFloats(-1, 1), RandomRangeFloats(-1, 1), RandomRangeFloats(-1, 1)).normalized;
+                dot = Vector3C.Dot(settingsCannon.Direction.normalized, direction);
 
-            Vector3C temp = new Vector3C(
-                (float)Math.Cos(randomAngleX) * randomImpulse, 
-                (float)Math.Sin(randomAngleX) * randomImpulse,
-                randomImpulse);
+            } while (dot < (1 - settingsCannon.openingAngle / 360));
 
-            force = temp * settingsCannon.Direction.normalized; 
+            force = direction * RandomRangeFloats(settingsCannon.minImpulse, settingsCannon.maxImpulse); ;
         }
         private static float RandomRangeFloats(float min, float max)
         {
@@ -155,9 +164,9 @@ public class AA1_ParticleSystem
 
         public bool CheckLifeTime()
         {
-            if(this.lifeTime < 0.0f)
+            if(lifeTime < 0.0f)
             {
-                this.active = false;
+                active = false;
                 return true;
             }
             return false;
@@ -165,58 +174,90 @@ public class AA1_ParticleSystem
 
         public void Euler(Settings settings, float dt)
         {
-            this.lastPos = this.position;
+            lastPos = position;
 
             // Apply forces
-            this.force += settings.gravity;
+            force += settings.gravity;
 
             // Calculate acceleration, velocity and position
-            this.aceleration = this.force / this.mass;
-            this.velocity = this.velocity + this.aceleration * dt;
-            this.position = this.position + this.velocity * dt;
+            aceleration = force / mass;
+            velocity = velocity + aceleration * dt;
+            position = position + velocity * dt;
 
             // Clean forces
-            this.force = Vector3C.zero;
+            force = Vector3C.zero;
         }
 
         public void CheckCollisions(SettingsCollision settingsCollision, Settings settings)
         {
-            if (CheckPlanesCollision(settingsCollision.planes, settings)) { return; }
+            if (CheckPlanes(settingsCollision.planes, settings)) { return; }
 
-            //if (CheckSpheresCollision(settingsCollision.spheres, settings)) { return; }
+            if (CheckSpheres(settingsCollision.spheres, settings)) { return; }
 
-            //if (CheckCapsulesCollision(settingsCollision.capsules, settings)) { return; }
+            if (CheckCapsules(settingsCollision.capsules, settings)) { return; }
         }
 
-        public bool CheckPlanesCollision(PlaneC[] planes, Settings settings)
+        public bool CheckPlanes(PlaneC[] planes, Settings settings)
         {
-            for (int i = 0; i < planes.Length; i++)
+            foreach(PlaneC plane in planes)
             {
-                // 1. Distance
-                double distance = planes[i].DistanceToPoint(position);
-
-                if (distance < 0.0f)
-                {
-                    // 2. Recolocamos la particula 
-                    position = planes[i].IntersectionWithLine( new LineC(lastPos, position));
-
-                    // 3. Colision
-                    CollisionPlaneReaction(planes[i], settings);
+                if(CollisionPlane(plane, settings))
                     return true;
-                }
             }
             return false;
         }
 
-        //public bool CheckSpheresCollision(SphereC[] spheres, Settings settings)
-        //{
-        //    return true;
-        //}
+        public bool CollisionPlane(PlaneC plane, Settings settings)
+        {
+            // 1. Distance
+            double distance = plane.DistanceToPoint(position);
 
-        //public bool CheckCapsulesCollision(CapsuleC[] capsules, Settings settings)
-        //{
-        //    return true;
-        //}
+            if (distance < 0.0f)
+            {
+                // 2. Recolocamos la particula 
+                position = plane.IntersectionWithLine(new LineC(lastPos, position));
+
+                // 3. Colision
+                CollisionPlaneReaction(plane, settings);
+                return true;
+            }
+            return false;
+        }
+
+        public bool CheckSpheres(SphereC[] spheres, Settings settings)
+        {
+            for(int i = 0; i < spheres.Length; i++)
+            {
+                // Find the plane
+                Vector3C normalizedDistance = (position - spheres[i].position).normalized;
+                PlaneC plane = new PlaneC(spheres[i].position + normalizedDistance * spheres[i].radius, normalizedDistance);
+
+                if (CollisionPlane(plane, settings))
+                    return true;
+            }
+            return false;
+        }
+
+        public bool CheckCapsules(CapsuleC[] capsules, Settings settings)
+        {
+            for (int i = 0; i < capsules.Length; i++)
+            {
+                Vector3C capsuleDistance = capsules[i].positionB - capsules[i].positionA;
+                Vector3C particleDistance = position - capsules[i].positionA;
+
+                float projection = Vector3C.Dot(capsuleDistance.normalized, particleDistance);
+
+                Vector3C collisionPoint = capsules[i].positionA + capsuleDistance.normalized * projection;
+
+                Vector3C a = position - collisionPoint;
+
+                PlaneC plane = new PlaneC(collisionPoint + a.normalized * capsules[i].radius, a.normalized);
+
+                if(CollisionPlane(plane, settings))
+                    return true;
+            }
+            return false;
+        }
 
         public void CollisionPlaneReaction(PlaneC plane, Settings settings)
         {
@@ -294,7 +335,6 @@ public class AA1_ParticleSystem
 
         return 1.0f;
     }
-
 
     public int RandomParticlesToSpawn()
     {

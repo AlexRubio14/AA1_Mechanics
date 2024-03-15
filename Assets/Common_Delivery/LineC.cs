@@ -1,5 +1,3 @@
-using System;
-using System.Net.NetworkInformation;
 
 [System.Serializable]
 public struct LineC
