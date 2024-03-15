@@ -1,5 +1,3 @@
-using System;
-using System.Net.NetworkInformation;
 
 [System.Serializable]
 public struct LineC
@@ -36,18 +34,10 @@ public struct LineC
     public Vector3C NearestPoint(Vector3C point)
     {
         Vector3C vector = point - origin;
-        float dot = Vector3C.Dot(vector, direction);
+        float dot = Vector3C.Dot(direction, vector);
         Vector3C nearestPoint = origin - direction * dot;
 
         return nearestPoint;
-    }
-    public Vector3C NearestPoint(LineC line)
-    {
-        Vector3C cross = Vector3C.Cross(this.direction, line.direction);
-
-        // Not finished 
-
-        return new Vector3C();
     }
     #endregion
 

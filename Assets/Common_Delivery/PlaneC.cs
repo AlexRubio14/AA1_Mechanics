@@ -1,4 +1,3 @@
-using System;
 
 [System.Serializable]
 public struct PlaneC
@@ -22,41 +21,55 @@ public struct PlaneC
     }
     public PlaneC(Vector3C pointA, Vector3C pointB, Vector3C pointC)
     {
-        this.position = pointA;
-        this.normal = Vector3C.Cross(pointB - pointA, pointC - pointA);
+        position = pointA;
+        normal = Vector3C.Cross(pointB - pointA, pointC - pointA);
     }
-    public PlaneC(float a, float b, float c, float d)
+    
+    public PlaneC(Vector3C n, float D)
     {
-        if(a != 0)
-            this.position = new Vector3C(d / a, 0, 0); 
-        else if(b != 0)
-            this.position = new Vector3C(0, d / b, 0);
-        else if (c != 0)
-            this.position = new Vector3C(0, 0, d / c);
-        else 
-            this.position = Vector3C.zero;
+        float x, y, z;
+        x = -D / -n.x;
+        y = -D / -n.y;
+        z = -D / -n.z;
 
-        this.normal = new Vector3C(a, b, c);
+        this.position = new Vector3C(x, y, z);
+        this.normal = n;
     }
-    #endregion
-
-    #region OPERATORS
-
     #endregion
 
     #region METHODS
-    
+    //ToEquation(Ax + By + Cz + D = 0)
+    public (float A, float B, float C, float D) ToEquation()
+    {
+        float d = (- (normal.x * position.x) - (normal.y * position.y) - (normal.z * position.z));
+
+        return (normal.x, normal.y, normal.z, d);
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (obj is PlaneC)
+        {
+            PlaneC other = (PlaneC)obj;
+            return other.normal == this.normal;
+        }
+        return false;
+    }
+
+    public float DistanceToPoint(Vector3C point)
+    {
+        return Vector3C.Dot(normal, (point - position));
+    }
+    public Vector3C IntersectionWithLine(LineC line)
+    {
+        float distance = Vector3C.Dot(normal, position - line.origin) / Vector3C.Dot(normal, line.direction);
+        return line.origin + line.direction * distance;
+    }
     #endregion
 
     #region FUNCTIONS
-    //ToEquation(Ax + By + Cz + D = 0)
-    public  (float A, float B, float C, float D) ToEquation()
-    {
-        return (0, 0, 0, 0);
-    }
-    //NearestPoint
-    //Intersection
-    //Equals
+
+
     #endregion
 
 }

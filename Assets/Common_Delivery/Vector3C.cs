@@ -141,7 +141,7 @@ public struct Vector3C
     public static Vector3C CreateVector3(Vector3C a, Vector3C b)
     {
         return b - a;
-    }
+    } 
     #endregion
 
 }
